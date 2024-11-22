@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
+	"url-shortener/internal/app"
 	"url-shortener/internal/config"
 	"url-shortener/pkg/badaslog"
 )
@@ -17,26 +19,22 @@ const (
 func main() {
 	config := config.MustLoad()
 
-	logger := NewLogger(config.Env)
+	log := NewLogger(config.Env)
 
-	logger.Info(
-		"starting url-shortener service",
-		slog.String("env", config.Env),
-		slog.String("address", fmt.Sprintf("%s:%d", config.HTTPServer.Host, config.HTTPServer.Port)),
-	)
+	app := app.New(log, config.HTTPServer) //TODO: add arguments for storage, cache and etc.
 
-	// TODO: logger initialization
+	go func() {
+		app.HTTPServer.MustRun()
+	}()
 
-	// TODO: storage initialization
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	// TODO: cache initialization
+	<-stop
 
-	// TODO: creating router
-	// TODO: registering handlers
-	// TODO: adding middlewares to router
-
-	// TODO: HTTP server initialization
-	// TODO: graceful shutdownm
+	app.HTTPServer.Run()
+	log.Info("Gracefully stopped!")
 }
 
 func NewLogger(env string) *slog.Logger {
