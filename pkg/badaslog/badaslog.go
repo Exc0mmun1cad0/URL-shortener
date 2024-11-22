@@ -96,6 +96,10 @@ func (h *BadaHandler) Handle(ctx context.Context, r slog.Record) error {
 		return fmt.Errorf("error when marshaling attrs: %w", err)
 	}
 
+	if len(bytes) == 2 {
+		bytes = []byte{}
+	}
+
 	fmt.Println(
 		colorize(lightGray, r.Time.Format(timeFormat)),
 		level,
