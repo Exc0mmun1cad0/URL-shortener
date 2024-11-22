@@ -38,6 +38,10 @@ func MustLoad() *Config {
 	once.Do(func() {
 		configPath := fetchConfigPath()
 
+		if configPath == "" {
+			panic("config path is empty. Use env CONFIG_PATH or specify it as a flag --config_path")
+		}
+
 		if _, err := os.Stat(configPath); os.IsNotExist(err) {
 			panic("config file does not exist: " + configPath)
 		}
@@ -51,7 +55,7 @@ func MustLoad() *Config {
 }
 
 func fetchConfigPath() (path string) {
-	flag.StringVar(&path, "config", "", "path to config file")
+	flag.StringVar(&path, "config_path", "", "path to config file")
 	flag.Parse()
 
 	if path == "" {
