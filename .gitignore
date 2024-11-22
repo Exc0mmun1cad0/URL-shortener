@@ -25,4 +25,4 @@ go.work.sum
 .env
 
 ##### My custom rules #####
-config
+config/local.yaml
